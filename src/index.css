@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:  "poppins", sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-6 lg:px-10;
+  }
+
+  .section-padding {
+    @apply py-20;
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/30;
+  }
+
+  .card {
+    @apply bg-white rounded-3xl shadow-lg border border-slate-200;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent;
+  }
+
+  .hero-button {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300;
+  }
+}
