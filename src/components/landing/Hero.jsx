@@ -8,11 +8,14 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Button from "../common/Button";
 import Container from "../layout/Container";
 
 
 export default function Hero() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/40 to-white pt-24 pb-14">
 
@@ -56,13 +59,9 @@ export default function Hero() {
 
             {/* Buttons */}
             <div className="mt-10 flex flex-wrap gap-4">
-              <Button size="lg">
+              <Button size="lg" onClick={() => navigate("/login")}>
                 Continue to Login
                 <ArrowRight size={18} className="ml-2" />
-              </Button>
-
-              <Button variant="outline" size="lg">
-                Explore Features
               </Button>
             </div>
 

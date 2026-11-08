@@ -1,10 +1,24 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../components/layout/Navbar";
 import AnalyticsStats from "../components/analytics/Analytics";
 import DishScorecard from "../components/analytics/DishScorecard";
-import WastageTrendChart from "../components/analytics/WastageTrendChart";
-import SatisfactionTrendChart from "../components/analytics/SatisfactionTrendChart";
-import CorrelationCard from "../components/analytics/CorrelationCard";
+import FeedbackComments from "../components/analytics/FeedbackComments";
+import MonthlyReport from "../components/analytics/MonthlyReport";
+
 export default function HigherAdminDashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "higher_admin") {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   return (
     <>
       <Navbar />
@@ -19,22 +33,22 @@ export default function HigherAdminDashboard() {
           <p className="mt-2 text-slate-600">
             Monitor satisfaction, food wastage and dining performance.
           </p>
-         <div className="mt-10">
-        <AnalyticsStats />
-        </div>
 
-         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <WastageTrendChart />
-        <SatisfactionTrendChart />
-        </div>
+          <div className="mt-10">
+            <AnalyticsStats />
+          </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <CorrelationCard />
-        </div>
-        <div className="mt-8">
-        <DishScorecard />
-        </div>
-       
+          <div className="mt-8">
+            <DishScorecard />
+          </div>
+
+          <div className="mt-8">
+            <FeedbackComments />
+          </div>
+
+          <div className="mt-8">
+            <MonthlyReport />
+          </div>
 
         </div>
       </section>

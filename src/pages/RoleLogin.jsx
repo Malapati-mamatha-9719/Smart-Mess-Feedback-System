@@ -5,6 +5,15 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/common/Button";
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+
+// Frontend role slugs (used in URLs) -> backend role values, and where to send each role after login
+const ROLE_CONFIG = {
+  "student": { backendRole: "student", dashboardPath: "/student-dashboard" },
+  "mess-admin": { backendRole: "admin", dashboardPath: "/mess-admin-dashboard" },
+  "higher-admin": { backendRole: "higher_admin", dashboardPath: "/higher-admin-dashboard" },
+};
+
 export default function RoleLogin() {
   const { role } = useParams();
   const navigate = useNavigate();
@@ -18,6 +27,12 @@ export default function RoleLogin() {
   const [password, setPassword] =
     useState("");
 
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
   const roleName = role
     ?.split("-")
     .map(
@@ -27,18 +42,49 @@ export default function RoleLogin() {
     )
     .join(" ");
 
-  const handleLogin = (e) => {
+  const roleConfig = ROLE_CONFIG[role];
+
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    console.log({
-      role,
-      email,
-      password,
-    });
+    if (!roleConfig) {
+      setError("Unknown role. Please go back and pick a valid option.");
+      return;
+    }
 
-    alert(
-      "Login API will be connected later."
-    );
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        setError("Incorrect email or password.");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.role !== roleConfig.backendRole) {
+        setError(
+          `This account isn't registered as ${roleName}. Please use the correct login page for your role.`
+        );
+        return;
+      }
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("role", data.role);
+
+      navigate(roleConfig.dashboardPath);
+    } catch (err) {
+      setError("Could not reach the server. Please make sure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -146,11 +192,18 @@ export default function RoleLogin() {
 
               </div>
 
+              {error && (
+                <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
+                disabled={loading}
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </Button>
 
             </form>

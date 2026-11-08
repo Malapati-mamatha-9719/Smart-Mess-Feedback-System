@@ -1,8 +1,24 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../components/layout/Navbar";
-import Adminstats from "../components/admin/Adminstats";
+import AdminStats from "../components/admin/AdminStats";
 import MenuForm from "../components/admin/MenuForm";
 import WastageForm from "../components/admin/WastageForm";
+
 export default function MessAdminDashboard() {
+  const navigate = useNavigate();
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   return (
     <>
       <Navbar />
@@ -32,11 +48,13 @@ export default function MessAdminDashboard() {
 
             {/* Wastage */}
 
-            <WastageForm />
+            <WastageForm
+              onWastageSubmitted={() => setStatsRefreshKey((k) => k + 1)}
+            />
 
             {/* Analytics */}
 
-           <Adminstats />
+            <AdminStats refreshKey={statsRefreshKey} />
 
           </div>
 

@@ -1,25 +1,77 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const API_BASE_URL = "http://127.0.0.1:8000";
+
+const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
 
 export default function MenuForm() {
   const [mealType, setMealType] = useState("Lunch");
   const [dish, setDish] = useState("");
-  const [dishes, setDishes] = useState([
-    "Rice",
-    "Dal",
-    "Paneer Curry",
-  ]);
+  const [allItems, setAllItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [adding, setAdding] = useState(false);
 
-  const addDish = () => {
-    if (!dish.trim()) return;
-
-    setDishes([...dishes, dish]);
-    setDish("");
+  const fetchTodayMenu = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`${API_BASE_URL}/menu/today`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        setError("Could not load today's menu.");
+        return;
+      }
+      const data = await response.json();
+      setAllItems(data);
+    } catch (err) {
+      setError("Could not reach the server. Please make sure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeDish = (index) => {
-    setDishes(
-      dishes.filter((_, i) => i !== index)
-    );
+  useEffect(() => {
+    fetchTodayMenu();
+  }, []);
+
+  const dishesForSelectedMeal = allItems.filter(
+    (item) => item.meal_type === mealType.toLowerCase()
+  );
+
+  const addDish = async () => {
+    if (!dish.trim()) return;
+
+    setAdding(true);
+    setError("");
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/menu/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          meal_type: mealType.toLowerCase(),
+          item_name: dish.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        setError("Could not add dish. Please try again.");
+        return;
+      }
+
+      const newItem = await response.json();
+      setAllItems([...allItems, newItem]);
+      setDish("");
+    } catch (err) {
+      setError("Could not reach the server. Please make sure the backend is running.");
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
@@ -47,10 +99,9 @@ export default function MenuForm() {
           }
           className="w-full rounded-xl border border-slate-300 p-3"
         >
-          <option>Breakfast</option>
-          <option>Lunch</option>
-          <option>Dinner</option>
-          <option>Snacks</option>
+          {MEAL_TYPES.map((type) => (
+            <option key={type}>{type}</option>
+          ))}
         </select>
       </div>
 
@@ -70,47 +121,48 @@ export default function MenuForm() {
 
         <button
           onClick={addDish}
-          className="rounded-xl bg-emerald-600 px-6 text-white font-medium hover:bg-emerald-700"
+          disabled={adding}
+          className="rounded-xl bg-emerald-600 px-6 text-white font-medium hover:bg-emerald-700 disabled:opacity-60"
         >
-          Add
+          {adding ? "Adding..." : "Add"}
         </button>
 
       </div>
+
+      {error && (
+        <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Dish List */}
 
       <div className="mt-6 flex flex-wrap gap-3">
 
-        {dishes.map((item, index) => (
+        {loading && (
+          <p className="text-slate-400 text-sm">Loading...</p>
+        )}
+
+        {!loading && dishesForSelectedMeal.length === 0 && (
+          <p className="text-slate-400 text-sm">
+            No {mealType.toLowerCase()} items added yet.
+          </p>
+        )}
+
+        {dishesForSelectedMeal.map((item) => (
 
           <div
-            key={index}
+            key={item.id}
             className="flex items-center gap-3 rounded-full bg-emerald-50 px-4 py-2"
           >
             <span className="text-emerald-700">
-              {item}
+              {item.item_name}
             </span>
-
-            <button
-              onClick={() =>
-                removeDish(index)
-              }
-              className="text-red-500 font-bold"
-            >
-              ×
-            </button>
-
           </div>
 
         ))}
 
       </div>
-
-      <button
-        className="mt-8 w-full rounded-xl bg-emerald-600 py-3 text-white font-semibold hover:bg-emerald-700"
-      >
-        Save Menu
-      </button>
 
     </div>
   );

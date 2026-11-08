@@ -10,12 +10,18 @@ export default function MenuSection({
       </h3>
 
       <div className="mt-4 flex flex-wrap gap-3">
+        {dishes.length === 0 && (
+          <p className="text-slate-400 text-sm">
+            No items added yet.
+          </p>
+        )}
+
         {dishes.map((dish) => (
           <span
-            key={dish}
+            key={dish.id}
             className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 font-medium"
           >
-            {dish}
+            {dish.item_name}
           </span>
         ))}
       </div>

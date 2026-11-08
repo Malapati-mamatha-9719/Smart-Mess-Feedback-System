@@ -38,7 +38,7 @@ const challenges = [
 export default function ChallengeSection() {
   return (
     <section
-      id="challenge"
+      id="challenges"
       className="bg-white py-16"
     >
       <Container>

@@ -44,7 +44,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="workflow" className="py-24 bg-slate-50">
+    <section id="how-it-works" className="py-24 bg-slate-50">
       <Container>
         <SectionTitle
           badge="How It Works"
